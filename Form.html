@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paiement Formation Claude</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: une colonne façon ticket de caisse, bande à motifs en tête, trois étapes dans l'ordre */
+:root {
+  --bg: #F2E8D5;
+  --paper: #FBF5EA;
+  --ink: #141414;
+  --soft: #5A4C3E;
+  --clay: #9C4A2A;
+  --gold: #C8963E;
+  --line: #DCCAA8;
+  --ok: #3E6B3A;
+  --field: #FFFFFF;
+  --warn: #F6DCCB;
+  --display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 32px;
+}
+.band {
+  height: 22px; margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  background-color: var(--ink);
+  background-image: linear-gradient(135deg, transparent 50%, var(--clay) 50%), linear-gradient(225deg, transparent 50%, var(--gold) 50%);
+  background-size: 28px 14px; background-position: 0 8px, 14px 8px; background-repeat: repeat-x;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; padding-top: 28px; }
+.kicker { display: inline-block; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 13px; letter-spacing: 2px; padding: 6px 14px; border-radius: 999px; }
+h1 { margin: 10px 0 4px; font-size: clamp(30px, 7vw, 40px); line-height: 1.1; font-weight: 800; text-wrap: balance; }
+h1 span { color: var(--clay); }
+.lead { margin: 0; color: var(--soft); }
+.ticket { background: var(--paper); border-radius: 22px; padding: 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border: 1.5px dashed var(--line); }
+.ticket .label { font-size: 12px; letter-spacing: 1.5px; color: var(--soft); font-weight: 600; }
+.ticket .what { font-weight: 700; font-size: 18px; }
+.price { font-weight: 800; font-size: 34px; color: var(--clay); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price small { font-size: 16px; color: var(--ink); }
+.step { display: flex; flex-direction: column; gap: 12px; }
+.step h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+.num { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border: 0; margin: 0; padding: 0; }
+.choices legend { font-size: 14px; font-weight: 600; margin-bottom: 8px; padding: 0; }
+.choice { position: relative; }
+.choice input { position: absolute; opacity: 0; inset: 0; }
+.choice span { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; font-weight: 600; font-size: 15px; padding: 12px 10px; border-radius: 14px; border: 2px solid var(--line); min-height: 60px; cursor: pointer; background: var(--field); }
+.choice span small { font-weight: 400; font-size: 12px; color: var(--soft); }
+.choice input:checked + span { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.choice input:checked + span small { color: var(--line); }
+.choice input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+.tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tab { font: inherit; font-weight: 600; font-size: 15px; padding: 14px 10px; border-radius: 14px; border: 2px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; min-height: 52px; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab:focus-visible, .btn:focus-visible, .copy:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.panel { background: var(--paper); border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.row.last { border-bottom: 0; padding-bottom: 0; }
+.row .k { font-size: 13px; color: var(--soft); }
+.row .v { font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums; user-select: all; }
+.copy { font: inherit; font-size: 13px; font-weight: 600; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 14px; cursor: pointer; min-height: 40px; }
+.copy.done { background: var(--ok); border-color: var(--ok); color: var(--paper); }
+ol.how { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+ol.how code { font-family: inherit; font-weight: 700; background: var(--bg); padding: 1px 8px; border-radius: 6px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 14px; font-weight: 600; }
+.field input { font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink); width: 100%; }
+.field input[aria-invalid="true"] { border-color: var(--clay); }
+.err { font-size: 13px; color: var(--clay); margin: 0; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background: var(--clay); color: var(--paper); font-weight: 700; font-size: 17px; padding: 16px; border-radius: 16px; min-height: 56px; text-align: center; }
+.btn:hover { background: #7E3A20; }
+.btn[aria-disabled="true"] { background: var(--line); color: var(--soft); pointer-events: none; }
+.note { margin: 0; font-size: 13px; color: var(--soft); }
+.recap { background: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: 14px; white-space: pre-line; }
+.alert { background: var(--warn); border-radius: 16px; padding: 14px 16px; font-size: 14px; }
+.timeline { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.timeline li { display: flex; gap: 10px; align-items: flex-start; }
+.timeline li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); margin-top: 7px; flex-shrink: 0; }
+footer { display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; padding-top: 8px; font-size: 14px; }
+footer .socials { display: flex; gap: 6px 18px; flex-wrap: wrap; justify-content: center; font-weight: 600; }
+footer .small { font-size: 12px; color: var(--soft); }
+@media (prefers-reduced-motion: no-preference) { .copy, .tab, .btn, .choice span { transition: background .15s, color .15s; } }
+</style>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="band" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <span class="kicker">FORMATION DÉBUTANTS</span>
+    <h1>Réserve ta place à la formation <span>Claude</span></h1>
+    <p class="lead">Trois étapes : tes infos, ton paiement par Orange Money ou MTN MoMo, puis ta preuve sur WhatsApp. Ton guide PDF arrive ensuite dans ta boîte email, dans la langue de ton choix.</p>
+  </header>
+
+  <section class="ticket" aria-label="Récapitulatif">
+    <div>
+      <div class="label">TU PAIES</div>
+      <div class="what">Formation Claude débutants<br>+ guide PDF offert</div>
+    </div>
+    <div class="price">2 000 <small>FCFA</small></div>
+  </section>
+
+  <section class="step" aria-labelledby="s1">
+    <h2 id="s1"><span class="num">1</span>Tes informations</h2>
+    <div class="panel">
+      <fieldset class="choices">
+        <legend>Dans quelle langue veux-tu ton guide PDF ?</legend>
+        <label class="choice"><input type="radio" name="langue" id="lang-fr" value="Français" checked><span>Français<small>Démarrage Claude</small></span></label>
+        <label class="choice"><input type="radio" name="langue" id="lang-en" value="Anglais"><span>English<small>Getting Started with Claude</small></span></label>
+      </fieldset>
+      <div class="field">
+        <label for="nom">Ton nom complet</label>
+        <input id="nom" type="text" autocomplete="name" placeholder="Ex. : Awa Ngono">
+      </div>
+      <div class="field">
+        <label for="email">Ton adresse email (pour recevoir ton PDF)</label>
+        <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="Ex. : awa.ngono@gmail.com" aria-describedby="email-err">
+        <p class="err" id="email-err" hidden>Vérifie ton adresse email : il manque peut-être le @ ou le point.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" aria-labelledby="s2">
+    <h2 id="s2"><span class="num">2</span>Envoie 2 000 FCFA</h2>
+    <div class="tabs" role="tablist" aria-label="Moyen de paiement">
+      <button class="tab" role="tab" id="tab-om" aria-selected="true" aria-controls="panel-om" type="button">Orange Money</button>
+      <button class="tab" role="tab" id="tab-momo" aria-selected="false" aria-controls="panel-momo" type="button">MTN Mobile Money</button>
+    </div>
+
+    <div class="panel" role="tabpanel" id="panel-om" aria-labelledby="tab-om">
+      <div class="row">
+        <div><div class="k">Numéro Orange Money</div><div class="v">697 92 12 04</div></div>
+        <button class="copy" data-copy="697921204" type="button">Copier</button>
+      </div>
+      <div class="row">
+        <div><div class="k">Montant</div><div class="v">2 000 FCFA</div></div>
+        <button class="copy" data-copy="2000" type="button">Copier</button>
+      </div>
+      <div class="row last">
+        <div><div class="k">Nom affiché à l'écran</div><div class="v">MAMBE LYNNE</div></div>
+      </div>
+      <ol class="how">
+        <li>Compose <code>#150#</code> sur ton téléphone, ou ouvre l'application Max it.</li>
+        <li>Choisis le transfert d'argent vers un numéro Orange Money.</li>
+        <li>Entre le numéro <b>697 92 12 04</b> et le montant <b>2 000</b>.</li>
+        <li>Vérifie que le nom affiché est bien <b>MAMBE LYNNE</b>, puis valide avec ton code secret.</li>
+      </ol>
+    </div>
+
+    <div class="panel" role="tabpanel" id="panel-momo" aria-labelledby="tab-momo" hidden>
+      <div class="row">
+        <div><div class="k">Numéro MTN Mobile Money</div><div class="v">675 32 82 50</div></div>
+        <button class="copy" data-copy="675328250" type="button">Copier</button>
+      </div>
+      <div class="row">
+        <div><div class="k">Montant</div><div class="v">2 000 FCFA</div></div>
+        <button class="copy" data-copy="2000" type="button">Copier</button>
+      </div>
+      <div class="row last">
+        <div><div class="k">Nom affiché à l'écran</div><div class="v">ARMELLE TSOGOUE</div></div>
+      </div>
+      <ol class="how">
+        <li>Compose <code>*126#</code> sur ton téléphone, ou ouvre l'application MoMo.</li>
+        <li>Choisis le transfert d'argent vers un numéro MoMo.</li>
+        <li>Entre le numéro <b>675 32 82 50</b> et le montant <b>2 000</b>.</li>
+        <li>Vérifie que le nom affiché est bien <b>ARMELLE TSOGOUE</b>, puis valide avec ton code secret.</li>
+      </ol>
+    </div>
+    <p class="note">Ton opérateur t'envoie aussitôt un SMS « transfert effectué » : c'est ta confirmation de paiement. Garde-le, il te servira de preuve.</p>
+  </section>
+
+  <section class="step" aria-labelledby="s3">
+    <h2 id="s3"><span class="num">3</span>Envoie ta preuve sur WhatsApp</h2>
+    <div class="panel">
+      <div class="field">
+        <label for="ref">Référence de la transaction (dans le SMS de confirmation)</label>
+        <input id="ref" type="text" placeholder="Ex. : PP261024.1432.A12345">
+      </div>
+      <div>
+        <div class="k" style="font-size: 13px; color: var(--soft); margin-bottom: 6px">Message qui sera envoyé :</div>
+        <div class="recap" id="recap"></div>
+      </div>
+      <a class="btn" id="wa" href="https://wa.me/237697921204" target="_blank" rel="noopener">Envoyer ma preuve sur WhatsApp</a>
+      <p class="note">Le bouton ouvre WhatsApp avec ce message déjà rédigé. Ajoute la capture d'écran de ton SMS avant d'envoyer. Si WhatsApp ne s'ouvre pas, écris directement au <b>+237 697 92 12 04</b>.</p>
+    </div>
+  </section>
+
+  <section class="step" aria-labelledby="s4">
+    <h2 id="s4">Et ensuite ?</h2>
+    <ul class="timeline">
+      <li>Je vérifie ton paiement sur mon téléphone.</li>
+      <li>Tu reçois ton guide PDF dans ta boîte email, dans la langue choisie, en général dans la journée (maximum 24 h).</li>
+      <li>Je te confirme ta place à la formation sur WhatsApp.</li>
+    </ul>
+    <p class="note">Pense à regarder dans tes spams si l'email n'apparaît pas dans ta boîte de réception.</p>
+  </section>
+
+  <div class="alert"><b>Sécurité :</b> ne communique jamais ton code secret Mobile Money, même à moi. Je ne te le demanderai jamais.</div>
+
+  <footer>
+    <div><b>MAMBE LYNNE</b> · Formatrice Claude</div>
+    <div class="socials"><span>WhatsApp : +237 697 92 12 04</span><span>Facebook : Lynn Evie LP</span><span>TikTok : Evie Lynn</span></div>
+    <div class="small">Formation indépendante, non affiliée à Anthropic.</div>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var method = 'Orange Money';
+  var tabs = document.querySelectorAll('.tab');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (o) {
+        var on = o === t;
+        o.setAttribute('aria-selected', on ? 'true' : 'false');
+        document.getElementById(o.getAttribute('aria-controls')).hidden = !on;
+      });
+      method = t.textContent.trim();
+      update();
+    });
+  });
+
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = b.getAttribute('data-copy');
+      var done = function () {
+        b.textContent = 'Copié'; b.classList.add('done');
+        setTimeout(function () { b.textContent = 'Copier'; b.classList.remove('done'); }, 1800);
+      };
+      var fallback = function () {
+        var v = b.parentElement.querySelector('.v');
+        if (v) { var r = document.createRange(); r.selectNodeContents(v); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+        b.textContent = 'Sélectionné';
+      };
+      try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  var nom = document.getElementById('nom');
+  var email = document.getElementById('email');
+  var ref = document.getElementById('ref');
+  var err = document.getElementById('email-err');
+  var wa = document.getElementById('wa');
+  var recap = document.getElementById('recap');
+  var radios = document.querySelectorAll('input[name="langue"]');
+
+  function lang() {
+    var v = 'Français';
+    radios.forEach(function (r) { if (r.checked) v = r.value; });
+    return v;
+  }
+  function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+
+  function update() {
+    var e = email.value.trim();
+    var bad = e.length > 0 && !emailOk(e);
+    email.setAttribute('aria-invalid', bad ? 'true' : 'false');
+    err.hidden = !bad;
+    var msg = 'Bonjour Lynn, je viens de payer 2 000 FCFA par ' + method + ' pour la formation Claude débutants.' +
+      '\nNom : ' + (nom.value.trim() || '[ton nom]') +
+      '\nEmail : ' + (e || '[ton email]') +
+      '\nLangue du PDF : ' + lang() +
+      '\nRéférence : ' + (ref.value.trim() || '[référence du SMS]') +
+      '\nJe t\'envoie la capture de confirmation.';
+    recap.textContent = msg;
+    wa.href = 'https://wa.me/237697921204?text=' + encodeURIComponent(msg);
+    var ready = emailOk(e) && nom.value.trim().length > 1;
+    wa.setAttribute('aria-disabled', ready ? 'false' : 'true');
+    wa.textContent = ready ? 'Envoyer ma preuve sur WhatsApp' : 'Remplis ton nom et ton email (étape 1)';
+  }
+  [nom, email, ref].forEach(function (el) { el.addEventListener('input', update); });
+  radios.forEach(function (r) { r.addEventListener('change', update); });
+  update();
+})();
+</script>
+
+</body>
+</html>
